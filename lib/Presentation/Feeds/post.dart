@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:social/Models/post_model.dart';
+import 'package:social/Shared/Cubit/cubit.dart';
 
 import '../Components/Widgets/constants.dart';
 import '../Components/Widgets/text.dart';
 
 class BuildPostItem extends StatelessWidget {
-  const BuildPostItem({Key? key}) : super(key: key);
+  const BuildPostItem({Key? key, required this.postModel}) : super(key: key);
+  final PostModel? postModel;
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +17,7 @@ class BuildPostItem extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
         boxShadow: const [
-          BoxShadow(
-              color: Colors.black26, blurRadius: 5, offset: Offset(0, 3)),
+          BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 3)),
         ],
       ),
       child: Padding(
@@ -25,10 +27,9 @@ class BuildPostItem extends StatelessWidget {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 30,
-                  backgroundImage: NetworkImage(
-                      'https://img.freepik.com/free-photo/positive-delighted-bearded-man-appealing-you-points-fingers-makes-good-choice-has-funny-joyful-expression-chooses-someone-shows-its-up-you-gesture-picks-potential-client_273609-42154.jpg?w=900&t=st=1661932737~exp=1661933337~hmac=47e1793a4c6161c670f5d0d5a0b397be955b9941a455dfeb5f549a4762a150da'),
+                  backgroundImage: NetworkImage(postModel!.imageUrl!),
                 ),
                 sizedBox(width: 8),
                 Expanded(
@@ -37,7 +38,7 @@ class BuildPostItem extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          text('Muhammad Essam',
+                          text(postModel!.name!,
                               size: 16, fontWeight: FontWeight.w600),
                           sizedBox(width: 4),
                           const Icon(
@@ -47,7 +48,7 @@ class BuildPostItem extends StatelessWidget {
                           )
                         ],
                       ),
-                      text('January 21 ,2021 at 11:00 pm',
+                      text(postModel!.dateTime!,
                           size: 12,
                           color: Colors.grey,
                           fontWeight: FontWeight.w400),
@@ -66,10 +67,7 @@ class BuildPostItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: divider(),
             ),
-            text(
-                'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.',
-                size: 15,
-                fontWeight: FontWeight.w400),
+            text(postModel!.text!, size: 15, fontWeight: FontWeight.w400),
             sizedBox(height: 8),
             Wrap(
               children: [
@@ -125,25 +123,26 @@ class BuildPostItem extends StatelessWidget {
               ],
             ),
             sizedBox(height: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(
-                minWidth: 1,
-                minHeight: 1,
-                maxWidth: double.infinity,
-                maxHeight: 400,
-              ),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+            if (postModel!.postImageUrl! != '')
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minWidth: 1,
+                  minHeight: 1,
+                  maxWidth: double.infinity,
+                  maxHeight: 400,
                 ),
-                clipBehavior: Clip.antiAliasWithSaveLayer,
-                child: Image.network(
-                  'https://img.freepik.com/free-photo/no-problem-concept-bearded-man-makes-okay-gesture-has-everything-control-all-fine-gesture-wears-spectacles-jumper-poses-against-pink-wall-says-i-got-this-guarantees-something_273609-42817.jpg?w=900&t=st=1661931585~exp=1661932185~hmac=2654d033e3290d415aa25dab1e58ba101aeed045199c07f98ee7bc915e5578f0',
-                  fit: BoxFit.fitWidth,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  child: Image.network(
+                    postModel!.postImageUrl!,
+                    fit: BoxFit.fitWidth,
+                  ),
                 ),
               ),
-            ),
             sizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -182,10 +181,10 @@ class BuildPostItem extends StatelessWidget {
             sizedBox(height: 8),
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 20,
-                  backgroundImage: NetworkImage(
-                      'https://img.freepik.com/free-photo/positive-delighted-bearded-man-appealing-you-points-fingers-makes-good-choice-has-funny-joyful-expression-chooses-someone-shows-its-up-you-gesture-picks-potential-client_273609-42154.jpg?w=900&t=st=1661932737~exp=1661933337~hmac=47e1793a4c6161c670f5d0d5a0b397be955b9941a455dfeb5f549a4762a150da'),
+                  backgroundImage:
+                      NetworkImage(AppCubit.get(context).userModel!.imageUrl!),
                 ),
                 sizedBox(width: 8),
                 Expanded(

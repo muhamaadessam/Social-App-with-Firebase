@@ -264,7 +264,7 @@ class AppCubit extends Cubit<AppStates> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       postImage = File(pickedFile.path);
-      uploadPostImage();
+      //uploadPostImage();
       emit(GetPostImageSuccessState());
     } else {
       emit(GetPostImageErrorState());
@@ -279,16 +279,21 @@ class AppCubit extends Cubit<AppStates> {
     String? text,
     String? postImageUrl,
   }) {
+    print("PATH: Create Post");
+
     emit(CreatePostLoadingState());
     postModel = PostModel(
       name: userModel!.name,
       imageUrl: userModel!.imageUrl,
       uId: CashHelper.get(key: 'uId').toString(),
-      dateTime: dateTime,
-      text: text,
+      dateTime: dateTime??'',
+      text: text??'',
       postImageUrl: postImageUrl ?? '',
     );
+    print("PATH: Create Post before modelling");
     user.collection('posts').add(postModel!.toJson()).then((value) {
+      print("PATH: Create Post after add data");
+
       emit(CreatePostSuccessState());
     }).catchError((error) {
       emit(CreatePostErrorState());
@@ -301,6 +306,7 @@ class AppCubit extends Cubit<AppStates> {
     String? text,
   }) {
     emit(CreatePostLoadingState());
+    print("PATH: upload Post Image");
     firebase_storage.FirebaseStorage.instance
         .ref()
         .child('posts/${Uri.file(postImage!.path).pathSegments.last}')
@@ -312,6 +318,9 @@ class AppCubit extends Cubit<AppStates> {
           text: text,
           postImageUrl: value,
         );
+        print("PATH: upload Post Image after create Post");
+
+        getPosts();
         emit(CreatePostSuccessState());
       }).catchError((error) {
         emit(CreatePostErrorState());
@@ -322,6 +331,19 @@ class AppCubit extends Cubit<AppStates> {
       emit(CreatePostErrorState());
 
       print('error : $error');
+    });
+  }
+
+  List<PostModel> posts = [];
+  void getPosts() {
+    emit(GetPostsLoadingState());
+    user.collection('posts').get().then((value) {
+      value.docs.forEach((element) {
+        posts.add(PostModel.fromJson(element.data()));
+      });
+      emit(GetPostsSuccessState());
+    }).catchError((error) {
+      emit(GetPostsErrorState());
     });
   }
 }

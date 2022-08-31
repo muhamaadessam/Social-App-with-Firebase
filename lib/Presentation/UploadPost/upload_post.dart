@@ -38,6 +38,7 @@ class CreateNewPostScreen extends StatelessWidget {
                     );
                   }
                   textController.clear();
+                  cubit.removePostImage();
                 },
                 child: text(
                   'POST',
@@ -59,14 +60,14 @@ class CreateNewPostScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 30,
-                      backgroundImage: NetworkImage(cubit.postModel!.imageUrl!),
+                      backgroundImage: NetworkImage(cubit.userModel!.imageUrl!),
                     ),
                     sizedBox(width: 8),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          text(cubit.postModel!.name,
+                          text(cubit.userModel!.name!,
                               size: 16, fontWeight: FontWeight.w600),
                           sizedBox(width: 4),
                         ],

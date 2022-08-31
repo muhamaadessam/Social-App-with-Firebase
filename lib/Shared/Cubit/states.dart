@@ -46,3 +46,7 @@ class GetPostImageSuccessState extends AppStates {}
 class GetPostImageErrorState extends AppStates {}
 
 class RemovePostImageSuccessState extends AppStates {}
+
+class GetPostsLoadingState extends AppStates {}
+class GetPostsSuccessState extends AppStates {}
+class GetPostsErrorState extends AppStates {}
