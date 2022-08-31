@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:social/Models/post_model.dart';
 import 'package:social/Models/user_model.dart';
 import 'package:social/Presentation/Chat/chat_screen.dart';
 import 'package:social/Presentation/Components/Widgets/toast.dart';
@@ -157,9 +158,9 @@ class AppCubit extends Cubit<AppStates> {
     }
   }
 
-  File? profileImage;
   File? coverImage;
   var picker = ImagePicker();
+  File? profileImage;
 
   Future getProfileImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -248,6 +249,78 @@ class AppCubit extends Cubit<AppStates> {
       emit(UpDateUserDataSuccessState());
     }).catchError((error) {
       emit(UpDateUserDataErrorState());
+      print('error : $error');
+    });
+  }
+
+  File? postImage;
+
+  void removePostImage() {
+    postImage = null;
+    emit(RemovePostImageSuccessState());
+  }
+
+  Future getPostImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      postImage = File(pickedFile.path);
+      uploadPostImage();
+      emit(GetPostImageSuccessState());
+    } else {
+      emit(GetPostImageErrorState());
+      print('No image');
+    }
+  }
+
+  PostModel? postModel;
+
+  void createPost({
+    String? dateTime,
+    String? text,
+    String? postImageUrl,
+  }) {
+    emit(CreatePostLoadingState());
+    postModel = PostModel(
+      name: userModel!.name,
+      imageUrl: userModel!.imageUrl,
+      uId: CashHelper.get(key: 'uId').toString(),
+      dateTime: dateTime,
+      text: text,
+      postImageUrl: postImageUrl ?? '',
+    );
+    user.collection('posts').add(postModel!.toJson()).then((value) {
+      emit(CreatePostSuccessState());
+    }).catchError((error) {
+      emit(CreatePostErrorState());
+      print('error : $error');
+    });
+  }
+
+  void uploadPostImage({
+    String? dateTime,
+    String? text,
+  }) {
+    emit(CreatePostLoadingState());
+    firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child('posts/${Uri.file(postImage!.path).pathSegments.last}')
+        .putFile(postImage!)
+        .then((value) {
+      value.ref.getDownloadURL().then((value) {
+        createPost(
+          dateTime: dateTime,
+          text: text,
+          postImageUrl: value,
+        );
+        emit(CreatePostSuccessState());
+      }).catchError((error) {
+        emit(CreatePostErrorState());
+
+        print('error : $error');
+      });
+    }).catchError((error) {
+      emit(CreatePostErrorState());
+
       print('error : $error');
     });
   }
