@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:social/Models/user_model.dart';
 import 'package:social/Presentation/Chat/chat_screen.dart';
 import 'package:social/Presentation/Components/Widgets/toast.dart';
@@ -13,7 +14,8 @@ import 'package:social/Presentation/UploadPost/upload_post.dart';
 import 'package:social/Presentation/Users/users_screen.dart';
 import 'package:social/Shared/Cubit/states.dart';
 import 'package:social/Shared/Network/Local/cash_helper.dart';
-
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import '../../Presentation/Components/Constants/navigator.dart';
 import '../../Presentation/HomeScreen/home_screen.dart';
 
@@ -94,7 +96,7 @@ class AppCubit extends Cubit<AppStates> {
   DocumentSnapshot? snapshot;
 
   void getUser() async {
-    emit(GetUserInitialState());
+    emit(GetUserLoadingState());
     user.collection('users').doc(auth.currentUser!.uid).get().then((value) {
       snapshot = value;
       Map<String, dynamic> data = snapshot!.data() as Map<String, dynamic>;
@@ -146,12 +148,107 @@ class AppCubit extends Cubit<AppStates> {
 
   void changeBottomNav(context, int index) {
     if (index == 2) {
-      navigatorTo(context, const UploadPostScreen());
+      navigatorTo(context, const CreateNewPostScreen());
       currentIndex = 0;
       emit(NewPostState());
     } else {
       currentIndex = index;
       emit(ChangeBottomNaveState());
     }
+  }
+
+  File? profileImage;
+  File? coverImage;
+  var picker = ImagePicker();
+
+  Future getProfileImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      profileImage = File(pickedFile.path);
+      uploadProfileImage();
+      emit(GetProfileImageSuccessState());
+    } else {
+      emit(GetProfileImageErrorState());
+      print('No image');
+    }
+  }
+
+  Future getCoverImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      coverImage = File(pickedFile.path);
+      uploadCoverImage();
+      emit(GetProfileImageSuccessState());
+    } else {
+      emit(GetProfileImageErrorState());
+      print('No image');
+    }
+  }
+
+  void uploadProfileImage() {
+    firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child('users/${Uri.file(profileImage!.path).pathSegments.last}')
+        .putFile(profileImage!)
+        .then((value) {
+      print("profileImageUrl :$value");
+      value.ref.getDownloadURL().then((value) {
+        if (value != '') updateUser(imageUrl: value);
+        getUser();
+        print("profileImageUrl :$value");
+      }).catchError((error) {
+        print("profileImageUrl : error $error");
+      });
+    }).catchError((error) {
+      print("profileImageUrl : error $error");
+    });
+  }
+
+  void uploadCoverImage() {
+    firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child('users/${Uri.file(coverImage!.path).pathSegments.last}')
+        .putFile(coverImage!)
+        .then((value) {
+      value.ref.getDownloadURL().then((value) {
+        if (value != '') updateUser(coverImageUrl: value);
+        getUser();
+        print('value : $value');
+      }).catchError((error) {
+        print('error : $error');
+      });
+    }).catchError((error) {
+      print('error : $error');
+    });
+  }
+
+  void updateUser({
+    String? name,
+    String? bio,
+    String? phone,
+    String? coverImageUrl,
+    String? imageUrl,
+  }) {
+    emit(UpDateUserDataLoadingState());
+    userModel = UserModel(
+      name: name ?? userModel!.name,
+      phone: phone ?? userModel!.phone,
+      bio: bio ?? userModel!.bio,
+      email: userModel!.email,
+      uId: CashHelper.get(key: 'uId').toString(),
+      coverImageUrl: coverImageUrl ?? userModel!.coverImageUrl,
+      imageUrl: imageUrl ?? userModel!.imageUrl,
+    );
+    user
+        .collection('users')
+        .doc(CashHelper.get(key: 'uId'))
+        .update(userModel!.toJson())
+        .then((value) {
+      getUser();
+      emit(UpDateUserDataSuccessState());
+    }).catchError((error) {
+      emit(UpDateUserDataErrorState());
+      print('error : $error');
+    });
   }
 }

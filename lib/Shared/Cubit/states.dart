@@ -18,3 +18,22 @@ class GetUserInitialState extends AppStates {}
 class GetUserLoadingState extends AppStates {}
 class GetUserSuccessState extends AppStates {}
 class GetUserErrorState extends AppStates {}
+
+
+class GetProfileImageSuccessState extends AppStates {}
+class GetProfileImageErrorState extends AppStates {}
+
+class GetCoverImageSuccessState extends AppStates {}
+class GetCoverImageErrorState extends AppStates {}
+
+class UploadProfileImageSuccessState extends AppStates {}
+class UploadProfileImageErrorState extends AppStates {}
+class UploadProfileImageLoadingState extends AppStates {}
+
+class UploadCoverImageSuccessState extends AppStates {}
+class UploadCoverImageErrorState extends AppStates {}
+class UploadCoverImageLoadingState extends AppStates {}
+
+class UpDateUserDataSuccessState extends AppStates {}
+class UpDateUserDataErrorState extends AppStates {}
+class UpDateUserDataLoadingState extends AppStates {}

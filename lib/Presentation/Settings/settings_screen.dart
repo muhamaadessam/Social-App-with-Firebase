@@ -15,179 +15,185 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var cubit = AppCubit.get(context);
-    cubit.getUser();
-    UserModel? userModel = cubit.userModel;
+    //cubit.getUser();
     return BlocConsumer<AppCubit, AppStates>(
       listener: (context, state) => () {},
       builder: (context, state) {
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 250,
-                child: Stack(
-                  alignment: AlignmentDirectional.bottomCenter,
+        UserModel? userModel = cubit.userModel;
+
+        return state is GetUserLoadingState
+            ? const CircularProgressIndicator()
+            : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
                   children: [
-                    Align(
-                      alignment: AlignmentDirectional.topCenter,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          minWidth: 1,
-                          minHeight: 1,
-                          maxWidth: double.infinity,
-                          maxHeight: 180,
-                        ),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.vertical(
-                                top: Radius.zero, bottom: Radius.circular(20)),
+                    SizedBox(
+                      height: 250,
+                      child: Stack(
+                        alignment: AlignmentDirectional.bottomCenter,
+                        children: [
+                          Align(
+                            alignment: AlignmentDirectional.topCenter,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: 1,
+                                minHeight: 1,
+                                maxWidth: double.infinity,
+                                maxHeight: 180,
+                              ),
+                              child: Container(
+                                width: double.infinity,
+                                decoration: const BoxDecoration(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.zero,
+                                      bottom: Radius.circular(20)),
+                                ),
+                                clipBehavior: Clip.antiAliasWithSaveLayer,
+                                child: Image.network(
+                                  '${userModel!.coverImageUrl}',
+                                  fit: BoxFit.fitWidth,
+                                ),
+                              ),
+                            ),
                           ),
-                          clipBehavior: Clip.antiAliasWithSaveLayer,
-                          child: Image.network(
-                            '${userModel!.coverImageUrl}',
-                            fit: BoxFit.fitWidth,
+                          CircleAvatar(
+                            radius: 80,
+                            backgroundColor: Colors.white,
+                            child: CircleAvatar(
+                              radius: 75,
+                              backgroundImage:
+                                  NetworkImage('${userModel.imageUrl}'),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                    CircleAvatar(
-                      radius: 80,
-                      backgroundColor: Colors.white,
-                      child: CircleAvatar(
-                        radius: 75,
-                        backgroundImage: NetworkImage('${userModel.imageUrl}'),
+                    sizedBox(height: 8),
+                    text(
+                      userModel.name,
+                      fontWeight: FontWeight.w600,
+                      size: 18,
+                    ),
+                    text(
+                      userModel.bio,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey,
+                      size: 14,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {},
+                              child: Column(
+                                children: [
+                                  text(
+                                    '563',
+                                    fontWeight: FontWeight.w600,
+                                    size: 16,
+                                  ),
+                                  sizedBox(height: 8),
+                                  text(
+                                    'Posts',
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.grey,
+                                    size: 14,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {},
+                              child: Column(
+                                children: [
+                                  text(
+                                    '265',
+                                    fontWeight: FontWeight.w600,
+                                    size: 16,
+                                  ),
+                                  sizedBox(height: 8),
+                                  text(
+                                    'Photos',
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.grey,
+                                    size: 14,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {},
+                              child: Column(
+                                children: [
+                                  text(
+                                    '12K',
+                                    fontWeight: FontWeight.w600,
+                                    size: 16,
+                                  ),
+                                  sizedBox(height: 8),
+                                  text(
+                                    'Followers',
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.grey,
+                                    size: 14,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {},
+                              child: Column(
+                                children: [
+                                  text(
+                                    '956',
+                                    fontWeight: FontWeight.w600,
+                                    size: 16,
+                                  ),
+                                  sizedBox(height: 8),
+                                  text(
+                                    'Friends',
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.grey,
+                                    size: 14,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {},
+                            child: text('Add Photo', color: Colors.blue),
+                          ),
+                        ),
+                        sizedBox(width: 16),
+                        OutlinedButton(
+                          onPressed: () {
+                            navigatorTo(context, EditProfileScreen());
+                          },
+                          child: const Icon(
+                            Icons.edit,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ),
-              text(
-                userModel.name,
-                fontWeight: FontWeight.w600,
-                size: 18,
-              ),
-              text(
-                userModel.bio,
-                fontWeight: FontWeight.w400,
-                color: Colors.grey,
-                size: 14,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {},
-                        child: Column(
-                          children: [
-                            text(
-                              '563',
-                              fontWeight: FontWeight.w600,
-                              size: 16,
-                            ),
-                            sizedBox(height: 8),
-                            text(
-                              'Posts',
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                              size: 14,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {},
-                        child: Column(
-                          children: [
-                            text(
-                              '265',
-                              fontWeight: FontWeight.w600,
-                              size: 16,
-                            ),
-                            sizedBox(height: 8),
-                            text(
-                              'Photos',
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                              size: 14,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {},
-                        child: Column(
-                          children: [
-                            text(
-                              '12K',
-                              fontWeight: FontWeight.w600,
-                              size: 16,
-                            ),
-                            sizedBox(height: 8),
-                            text(
-                              'Followers',
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                              size: 14,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {},
-                        child: Column(
-                          children: [
-                            text(
-                              '956',
-                              fontWeight: FontWeight.w600,
-                              size: 16,
-                            ),
-                            sizedBox(height: 8),
-                            text(
-                              'Friends',
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey,
-                              size: 14,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {},
-                      child: text('Add Photo', color: Colors.blue),
-                    ),
-                  ),
-                  sizedBox(width: 16),
-                  OutlinedButton(
-                    onPressed: () {
-                      navigatorTo(context, const EditProfileScreen());
-                    },
-                    child: const Icon(
-                      Icons.edit,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
+              );
       },
     );
   }
