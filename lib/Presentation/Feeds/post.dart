@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:social/Models/post_model.dart';
 import 'package:social/Shared/Cubit/cubit.dart';
-
+import '../Components/Constants/icon_broken.dart';
 import '../Components/Widgets/constants.dart';
 import '../Components/Widgets/text.dart';
 
 class BuildPostItem extends StatelessWidget {
-  const BuildPostItem({Key? key, required this.postModel}) : super(key: key);
+  const BuildPostItem({
+    Key? key,
+    required this.postModel,
+    this.index,
+  }) : super(key: key);
   final PostModel? postModel;
+  final int? index;
 
   @override
   Widget build(BuildContext context) {
@@ -151,27 +156,30 @@ class BuildPostItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   InkWell(
+                    onTap: () {},
                     child: Row(
                       children: [
                         const Icon(
-                          Icons.favorite_border_rounded,
+                          IconBroken.Heart,
                           color: Colors.blue,
                           size: 24,
                         ),
                         sizedBox(width: 8),
-                        text('120', color: Colors.grey)
+                        text('${AppCubit.get(context).likes[index!]}',
+                            color: Colors.grey)
                       ],
                     ),
                   ),
                   Row(
                     children: [
                       const Icon(
-                        Icons.comment,
+                        IconBroken.Chat,
                         color: Colors.blue,
                         size: 20,
                       ),
                       sizedBox(width: 8),
-                      text('120 Comment', color: Colors.grey)
+                      text('${AppCubit.get(context).comments[index!]} Comment',
+                          color: Colors.grey)
                     ],
                   ),
                 ],
@@ -188,18 +196,34 @@ class BuildPostItem extends StatelessWidget {
                 ),
                 sizedBox(width: 8),
                 Expanded(
-                  child: text('write a comment ...', color: Colors.grey),
-                ),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.favorite_border_rounded,
-                      color: Colors.blue,
-                      size: 24,
+                  child: TextField(
+                    onSubmitted: (value) {
+                      AppCubit.get(context).commentPost(
+                          postId: AppCubit.get(context).postsId[index!],
+                          comment: value);
+                    },
+                    decoration: const InputDecoration(
+                      hintText: 'write a comment ...',
+                      border: InputBorder.none,
                     ),
-                    sizedBox(width: 8),
-                    text('Like', color: Colors.grey)
-                  ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    AppCubit.get(context)
+                        .likePost(AppCubit.get(context).postsId[index!]);
+                  },
+                  child: Row(
+                    children: [
+                      const Icon(
+                        IconBroken.Heart,
+                        color: Colors.blue,
+                        size: 24,
+                      ),
+                      sizedBox(width: 8),
+                      text('Like', color: Colors.grey)
+                    ],
+                  ),
                 ),
               ],
             ),

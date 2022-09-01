@@ -50,3 +50,11 @@ class RemovePostImageSuccessState extends AppStates {}
 class GetPostsLoadingState extends AppStates {}
 class GetPostsSuccessState extends AppStates {}
 class GetPostsErrorState extends AppStates {}
+
+class SocialGetPostsSuccessState extends AppStates {}
+class SocialGetPostsErrorState extends AppStates {}
+class SocialLikePostSuccessState extends AppStates {}
+class SocialLikePostErrorState extends AppStates {}
+class SocialCommentPostSuccessState extends AppStates {}
+class SocialCommentPostErrorState extends AppStates {}
+

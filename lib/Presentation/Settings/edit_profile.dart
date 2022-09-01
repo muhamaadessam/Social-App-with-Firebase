@@ -4,6 +4,7 @@ import 'package:social/Presentation/Components/Widgets/app_bar.dart';
 import '../../Models/user_model.dart';
 import '../../Shared/Cubit/cubit.dart';
 import '../../Shared/Cubit/states.dart';
+import '../Components/Constants/icon_broken.dart';
 import '../Components/Widgets/constants.dart';
 import '../Components/Widgets/text.dart';
 import '../Components/Widgets/text_form_field.dart';
@@ -113,8 +114,8 @@ class EditProfileScreen extends StatelessWidget {
                                 icon: const CircleAvatar(
                                   radius: 20,
                                   child: Icon(
-                                    Icons.camera_alt,
-                                    size: 16,
+                                    IconBroken.Camera,
+                                    size: 20,
                                   ),
                                 ),
                               ),
@@ -139,8 +140,8 @@ class EditProfileScreen extends StatelessWidget {
                               icon: const CircleAvatar(
                                 radius: 20,
                                 child: Icon(
-                                  Icons.camera_alt,
-                                  size: 16,
+                                  IconBroken.Camera,
+                                  size: 20,
                                 ),
                               ),
                             ),

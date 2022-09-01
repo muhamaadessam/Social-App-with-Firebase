@@ -4,6 +4,7 @@ import 'package:social/Presentation/Components/Widgets/app_bar.dart';
 import 'package:social/Shared/Cubit/cubit.dart';
 import 'package:social/Shared/Cubit/states.dart';
 
+import '../Components/Constants/icon_broken.dart';
 import '../Components/Widgets/constants.dart';
 import '../Components/Widgets/text.dart';
 
@@ -39,6 +40,7 @@ class CreateNewPostScreen extends StatelessWidget {
                   }
                   textController.clear();
                   cubit.removePostImage();
+                  Navigator.pop(context);
                 },
                 child: text(
                   'POST',
@@ -115,7 +117,7 @@ class CreateNewPostScreen extends StatelessWidget {
                         icon: const CircleAvatar(
                           radius: 20,
                           child: Icon(
-                            Icons.close,
+                            IconBroken.Close_Square,
                             size: 16,
                           ),
                         ),
@@ -132,7 +134,7 @@ class CreateNewPostScreen extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.image),
+                            const Icon(IconBroken.Image),
                             sizedBox(width: 8),
                             text('Add Photo', color: Colors.blue)
                           ],

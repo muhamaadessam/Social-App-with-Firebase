@@ -36,7 +36,10 @@ class AppCubit extends Cubit<AppStates> {
     auth
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) {
-      user.collection('users').doc(auth.currentUser!.uid).get();
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(auth.currentUser!.uid)
+          .get();
 
       CashHelper.put(key: 'login', value: true);
       CashHelper.put(key: 'uId', value: value.user!.uid);
@@ -53,7 +56,8 @@ class AppCubit extends Cubit<AppStates> {
   }
 
   var auth = FirebaseAuth.instance;
-  var user = FirebaseFirestore.instance;
+
+  // var user = FirebaseFirestore.instance;
   UserModel? userModel;
 
   void userSignUp(
@@ -98,7 +102,11 @@ class AppCubit extends Cubit<AppStates> {
 
   void getUser() async {
     emit(GetUserLoadingState());
-    user.collection('users').doc(auth.currentUser!.uid).get().then((value) {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(auth.currentUser!.uid)
+        .get()
+        .then((value) {
       snapshot = value;
       Map<String, dynamic> data = snapshot!.data() as Map<String, dynamic>;
       userModel = UserModel.fromJson(data);
@@ -126,12 +134,13 @@ class AppCubit extends Cubit<AppStates> {
       imageUrl:
           'https://drive.google.com/file/d/1n1ACYKbIJRO-W6eULOd736EhyqJGD39R/view',
     );
-    user.collection('users').doc(uId).set(
+    FirebaseFirestore.instance.collection('users').doc(uId).set(
           userModel!.toJson(),
         );
   }
 
   int currentIndex = 0;
+
   List<String> titles = [
     'Home',
     'Chats',
@@ -236,11 +245,11 @@ class AppCubit extends Cubit<AppStates> {
       phone: phone ?? userModel!.phone,
       bio: bio ?? userModel!.bio,
       email: userModel!.email,
-      uId: CashHelper.get(key: 'uId').toString(),
+      uId: CashHelper.get(key: 'uId'),
       coverImageUrl: coverImageUrl ?? userModel!.coverImageUrl,
       imageUrl: imageUrl ?? userModel!.imageUrl,
     );
-    user
+    FirebaseFirestore.instance
         .collection('users')
         .doc(CashHelper.get(key: 'uId'))
         .update(userModel!.toJson())
@@ -285,13 +294,16 @@ class AppCubit extends Cubit<AppStates> {
     postModel = PostModel(
       name: userModel!.name,
       imageUrl: userModel!.imageUrl,
-      uId: CashHelper.get(key: 'uId').toString(),
-      dateTime: dateTime??'',
-      text: text??'',
+      uId: CashHelper.get(key: 'uId'),
+      dateTime: dateTime ?? '',
+      text: text ?? '',
       postImageUrl: postImageUrl ?? '',
     );
     print("PATH: Create Post before modelling");
-    user.collection('posts').add(postModel!.toJson()).then((value) {
+    FirebaseFirestore.instance
+        .collection('posts')
+        .add(postModel!.toJson())
+        .then((value) {
       print("PATH: Create Post after add data");
 
       emit(CreatePostSuccessState());
@@ -319,8 +331,6 @@ class AppCubit extends Cubit<AppStates> {
           postImageUrl: value,
         );
         print("PATH: upload Post Image after create Post");
-
-        getPosts();
         emit(CreatePostSuccessState());
       }).catchError((error) {
         emit(CreatePostErrorState());
@@ -335,15 +345,58 @@ class AppCubit extends Cubit<AppStates> {
   }
 
   List<PostModel> posts = [];
+  List<String> postsId = [];
+  List<int> likes = [];
+  List<int> comments = [];
+
   void getPosts() {
-    emit(GetPostsLoadingState());
-    user.collection('posts').get().then((value) {
-      value.docs.forEach((element) {
+    FirebaseFirestore.instance.collection('posts').get().then((value) {
+      for (var element in value.docs) {
+        element.reference.collection('likes').get().then((value) {
+          likes.add(value.docs.length);
+        }).catchError((error) {});
+        element.reference.collection('comments').get().then((value) {
+          comments.add(value.docs.length);
+        }).catchError((error) {});
+        postsId.add(element.id);
         posts.add(PostModel.fromJson(element.data()));
-      });
-      emit(GetPostsSuccessState());
+      }
+      emit(SocialGetPostsSuccessState());
     }).catchError((error) {
-      emit(GetPostsErrorState());
+      print(error.toString());
+      emit(SocialGetPostsErrorState());
+    });
+  }
+
+  void likePost(String postId) {
+    FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection('likes')
+        .doc(CashHelper.get(key: 'uId'))
+        .set({
+      'like': true,
+    }).then((value) {
+      emit(SocialLikePostSuccessState());
+    }).catchError((error) {
+      emit(SocialLikePostErrorState());
+    });
+  }
+
+  void commentPost({
+    String? postId,
+    String? comment,
+  }) {
+    FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .doc()
+        .set({'comment': comment, 'uId': CashHelper.get(key: 'uId')}).then(
+            (value) {
+      emit(SocialCommentPostSuccessState());
+    }).catchError((error) {
+      emit(SocialCommentPostErrorState());
     });
   }
 }

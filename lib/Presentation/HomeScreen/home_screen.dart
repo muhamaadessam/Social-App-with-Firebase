@@ -1,6 +1,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social/Presentation/Components/Constants/icon_broken.dart';
 import 'package:social/Presentation/Components/Constants/navigator.dart';
 import 'package:social/Presentation/Registration/sign_in_screen.dart';
 import 'package:social/Shared/Cubit/cubit.dart';
@@ -27,7 +28,7 @@ class HomeScreen extends StatelessWidget {
                 IconButton(
                   onPressed: () {},
                   icon: const Icon(
-                    Icons.notifications,
+                    IconBroken.Notification,
                     color: Colors.black,
                   ),
                 ),
@@ -37,7 +38,7 @@ class HomeScreen extends StatelessWidget {
                     navigatorReplacement(context, const SignInScreen());
                   },
                   icon: const Icon(
-                    Icons.search,
+                    IconBroken.Search,
                     color: Colors.black,
                   ),
                 ),
@@ -47,13 +48,14 @@ class HomeScreen extends StatelessWidget {
             bottomNavigationBar: CurvedNavigationBar(
               backgroundColor: Colors.transparent,
               color: Colors.white,
+              buttonBackgroundColor: Colors.blue,
               index: cubit.currentIndex,
               items: [
-                bottomBarIcons(context, icon: Icons.home, index: 0),
-                bottomBarIcons(context, icon: Icons.chat, index: 1),
-                bottomBarIcons(context, icon: Icons.upload_file, index: 2),
-                bottomBarIcons(context, icon: Icons.location_history, index: 3),
-                bottomBarIcons(context, icon: Icons.settings, index: 4),
+                bottomBarIcons(context, icon: IconBroken.Home, index: 0),
+                bottomBarIcons(context, icon: IconBroken.Message, index: 1),
+                bottomBarIcons(context, icon: IconBroken.Upload, index: 2),
+                bottomBarIcons(context, icon: IconBroken.User, index: 3),
+                bottomBarIcons(context, icon: IconBroken.Setting, index: 4),
               ],
               onTap: (index) {
                 cubit.changeBottomNav(context, index);

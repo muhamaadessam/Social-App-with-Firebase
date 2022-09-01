@@ -7,6 +7,7 @@ import 'package:social/Presentation/Components/Widgets/text.dart';
 import 'package:social/Shared/Cubit/cubit.dart';
 import 'package:social/Shared/Cubit/states.dart';
 
+import '../Components/Constants/icon_broken.dart';
 import 'edit_profile.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -15,7 +16,6 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var cubit = AppCubit.get(context);
-    //cubit.getUser();
     return BlocConsumer<AppCubit, AppStates>(
       listener: (context, state) => () {},
       builder: (context, state) {
@@ -171,25 +171,30 @@ class SettingsScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {},
-                            child: text('Add Photo', color: Colors.blue),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {},
+                              child: text('Add Photo', color: Colors.blue),
+                            ),
                           ),
-                        ),
-                        sizedBox(width: 16),
-                        OutlinedButton(
-                          onPressed: () {
-                            navigatorTo(context, EditProfileScreen());
-                          },
-                          child: const Icon(
-                            Icons.edit,
-                            color: Colors.blue,
+                          sizedBox(width: 8),
+                          IconButton(
+                            onPressed: () {
+                              navigatorTo(context, EditProfileScreen());
+                            },
+                            icon: const Icon(
+                              IconBroken.Edit_Square,
+                              color: Colors.blue,
+                              size: 30,
+                            ),
                           ),
-                        ),
-                      ],
+                          // sizedBox(width: 8)
+                        ],
+                      ),
                     ),
                   ],
                 ),
