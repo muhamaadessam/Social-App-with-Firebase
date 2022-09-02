@@ -8,11 +8,11 @@ class PostModel {
 
   PostModel(
       {this.uId,
-      this.name,
-      this.imageUrl,
-      this.text,
-      this.dateTime,
-      this.postImageUrl});
+        this.name,
+        this.imageUrl,
+        this.text,
+        this.dateTime,
+        this.postImageUrl});
 
   PostModel.fromJson(Map<String, dynamic> json) {
     uId = json['userId'];

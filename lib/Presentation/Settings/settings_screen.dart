@@ -4,8 +4,10 @@ import 'package:social/Models/user_model.dart';
 import 'package:social/Presentation/Components/Constants/navigator.dart';
 import 'package:social/Presentation/Components/Widgets/constants.dart';
 import 'package:social/Presentation/Components/Widgets/text.dart';
+import 'package:social/Presentation/Registration/sign_in_screen.dart';
 import 'package:social/Shared/Cubit/cubit.dart';
 import 'package:social/Shared/Cubit/states.dart';
+import 'package:social/Shared/Network/Local/cash_helper.dart';
 
 import '../Components/Constants/icon_broken.dart';
 import 'edit_profile.dart';
@@ -196,6 +198,11 @@ class SettingsScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                    TextButton(onPressed: () {
+                      cubit.auth.signOut();
+                      CashHelper.put(key: 'login', value: false);
+                      navigatorTo(context, const SignInScreen());
+                    }, child: text('SignOut'))
                   ],
                 ),
               );

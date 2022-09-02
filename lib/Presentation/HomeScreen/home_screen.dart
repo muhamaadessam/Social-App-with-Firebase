@@ -6,8 +6,8 @@ import 'package:social/Presentation/Components/Constants/navigator.dart';
 import 'package:social/Presentation/Registration/sign_in_screen.dart';
 import 'package:social/Shared/Cubit/cubit.dart';
 import 'package:social/Shared/Cubit/states.dart';
-
 import '../Components/Widgets/text.dart';
+import '../UploadPost/upload_post.dart';
 import 'bottom_nav_icons.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -19,6 +19,7 @@ class HomeScreen extends StatelessWidget {
         listener: (context, state) => () {},
         builder: (context, state) {
           var cubit = AppCubit.get(context);
+          var index=cubit.currentIndex;
           return Scaffold(
             appBar: AppBar(
               elevation: 0,
@@ -48,13 +49,21 @@ class HomeScreen extends StatelessWidget {
             bottomNavigationBar: CurvedNavigationBar(
               backgroundColor: Colors.transparent,
               color: Colors.white,
+              letIndexChange: (index){
+                if(index!=2) {
+                  return true;
+                }
+                navigatorTo(context, const CreateNewPostScreen());
+                return false;
+              },
               buttonBackgroundColor: Colors.blue,
-              index: cubit.currentIndex,
+              index: index,
               items: [
                 bottomBarIcons(context, icon: IconBroken.Home, index: 0),
-                bottomBarIcons(context, icon: IconBroken.Message, index: 1),
-                bottomBarIcons(context, icon: IconBroken.Upload, index: 2),
-                bottomBarIcons(context, icon: IconBroken.User, index: 3),
+                bottomBarIcons(context, icon: IconBroken.Chat, index: 1),
+                bottomBarIcons(context,
+                    icon: IconBroken.Paper_Upload, index: 2),
+                bottomBarIcons(context, icon: IconBroken.Location, index: 3),
                 bottomBarIcons(context, icon: IconBroken.Setting, index: 4),
               ],
               onTap: (index) {

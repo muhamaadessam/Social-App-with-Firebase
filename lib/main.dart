@@ -14,9 +14,8 @@ void main() async {
   await Firebase.initializeApp();
   await CashHelper.init();
   Bloc.observer = MyBlocObserver();
-  bool isLogin = CashHelper.get(key: 'login');
-
-  if (isLogin == null) {
+  // CashHelper.put(key: 'login', value: false);
+  if ( CashHelper.get(key: 'login') == null) {
     CashHelper.put(key: 'login', value: false);
   }
 
@@ -33,8 +32,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(
             create: (context) => AppCubit()
-              ..getUser()
-              ..getPosts()),
+              ..getUser()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

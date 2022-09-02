@@ -22,6 +22,10 @@ class CreateNewPostScreen extends StatelessWidget {
         return Scaffold(
           appBar: customAppBar(
             context,
+            onTap: () {
+              cubit.currentIndex = 0;
+              Navigator.pop(context);
+            },
             title: 'Create Post',
             actions: [
               TextButton(
@@ -40,6 +44,7 @@ class CreateNewPostScreen extends StatelessWidget {
                   }
                   textController.clear();
                   cubit.removePostImage();
+                  cubit.getPosts();
                   Navigator.pop(context);
                 },
                 child: text(

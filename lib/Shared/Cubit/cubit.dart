@@ -5,13 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:social/Models/message_model.dart';
 import 'package:social/Models/post_model.dart';
 import 'package:social/Models/user_model.dart';
 import 'package:social/Presentation/Chat/chat_screen.dart';
 import 'package:social/Presentation/Components/Widgets/toast.dart';
 import 'package:social/Presentation/Feeds/feeds_screen.dart';
 import 'package:social/Presentation/Settings/settings_screen.dart';
-import 'package:social/Presentation/UploadPost/upload_post.dart';
 import 'package:social/Presentation/Users/users_screen.dart';
 import 'package:social/Shared/Cubit/states.dart';
 import 'package:social/Shared/Network/Local/cash_helper.dart';
@@ -26,12 +26,36 @@ class AppCubit extends Cubit<AppStates> {
   static AppCubit get(context) => BlocProvider.of(context);
 
   FToast? fToast = FToast();
+  var auth = FirebaseAuth.instance;
+  UserModel? userModel;
+  DocumentSnapshot? snapshot;
+  int currentIndex = 0;
+  List<String> titles = [
+    'Home',
+    'Chats',
+    '',
+    'Users',
+    'Settings',
+  ];
+  List<Widget> screens = [
+    const FeedsScreen(),
+    const ChatScreen(),
+    Container(),
+    const UsersScreen(),
+    const SettingsScreen(),
+  ];
+  File? coverImage;
+  var picker = ImagePicker();
+  File? profileImage;
+  File? postImage;
+  PostModel? postModel;
+  List<PostModel> posts = [];
+  List<UserModel> users = [];
+  List<String> postsId = [];
+  List<int> likes = [];
+  List<int> comments = [];
 
-  void userSignIn(
-    context, {
-    required String email,
-    required String password,
-  }) {
+  void userSignIn(context, {required String email, required String password}) {
     emit(SignInLoadingState());
     auth
         .signInWithEmailAndPassword(email: email, password: password)
@@ -55,18 +79,11 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  var auth = FirebaseAuth.instance;
-
-  // var user = FirebaseFirestore.instance;
-  UserModel? userModel;
-
-  void userSignUp(
-    context, {
-    required String name,
-    required String phone,
-    required String email,
-    required String password,
-  }) {
+  void userSignUp(context,
+      {required String name,
+      required String phone,
+      required String email,
+      required String password}) {
     emit(SignUpLoadingState());
     auth
         .createUserWithEmailAndPassword(email: email, password: password)
@@ -98,8 +115,6 @@ class AppCubit extends Cubit<AppStates> {
     );
   }
 
-  DocumentSnapshot? snapshot;
-
   void getUser() async {
     emit(GetUserLoadingState());
     FirebaseFirestore.instance
@@ -117,12 +132,11 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  void userCreate({
-    required String? email,
-    required String? name,
-    required String? phone,
-    required String? uId,
-  }) {
+  void userCreate(
+      {required String? email,
+      required String? name,
+      required String? phone,
+      required String? uId}) {
     userModel = UserModel(
       name: name,
       email: email,
@@ -139,37 +153,16 @@ class AppCubit extends Cubit<AppStates> {
         );
   }
 
-  int currentIndex = 0;
-
-  List<String> titles = [
-    'Home',
-    'Chats',
-    '',
-    'Users',
-    'Settings',
-  ];
-  List<Widget> screens = [
-    const FeedsScreen(),
-    const ChatScreen(),
-    Container(),
-    const UsersScreen(),
-    const SettingsScreen(),
-  ];
-
   void changeBottomNav(context, int index) {
+    if (index == 1) getUsers();
     if (index == 2) {
-      navigatorTo(context, const CreateNewPostScreen());
-      currentIndex = 0;
       emit(NewPostState());
     } else {
+      print('deletsed');
       currentIndex = index;
       emit(ChangeBottomNaveState());
     }
   }
-
-  File? coverImage;
-  var picker = ImagePicker();
-  File? profileImage;
 
   Future getProfileImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -195,8 +188,8 @@ class AppCubit extends Cubit<AppStates> {
     }
   }
 
-  void uploadProfileImage() {
-    firebase_storage.FirebaseStorage.instance
+  void uploadProfileImage() async {
+    await firebase_storage.FirebaseStorage.instance
         .ref()
         .child('users/${Uri.file(profileImage!.path).pathSegments.last}')
         .putFile(profileImage!)
@@ -232,13 +225,12 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  void updateUser({
-    String? name,
-    String? bio,
-    String? phone,
-    String? coverImageUrl,
-    String? imageUrl,
-  }) {
+  void updateUser(
+      {String? name,
+      String? bio,
+      String? phone,
+      String? coverImageUrl,
+      String? imageUrl}) {
     emit(UpDateUserDataLoadingState());
     userModel = UserModel(
       name: name ?? userModel!.name,
@@ -262,8 +254,6 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  File? postImage;
-
   void removePostImage() {
     postImage = null;
     emit(RemovePostImageSuccessState());
@@ -281,15 +271,8 @@ class AppCubit extends Cubit<AppStates> {
     }
   }
 
-  PostModel? postModel;
-
-  void createPost({
-    String? dateTime,
-    String? text,
-    String? postImageUrl,
-  }) {
+  void createPost({String? dateTime, String? text, String? postImageUrl}) {
     print("PATH: Create Post");
-
     emit(CreatePostLoadingState());
     postModel = PostModel(
       name: userModel!.name,
@@ -305,7 +288,7 @@ class AppCubit extends Cubit<AppStates> {
         .add(postModel!.toJson())
         .then((value) {
       print("PATH: Create Post after add data");
-
+      getPosts();
       emit(CreatePostSuccessState());
     }).catchError((error) {
       emit(CreatePostErrorState());
@@ -313,10 +296,7 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  void uploadPostImage({
-    String? dateTime,
-    String? text,
-  }) {
+  void uploadPostImage({String? dateTime, String? text}) {
     emit(CreatePostLoadingState());
     print("PATH: upload Post Image");
     firebase_storage.FirebaseStorage.instance
@@ -344,23 +324,35 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  List<PostModel> posts = [];
-  List<String> postsId = [];
-  List<int> likes = [];
-  List<int> comments = [];
+  void getPosts() async {
+    postsId.clear();
+    posts.clear();
+    likes.clear();
+    comments.clear();
 
-  void getPosts() {
-    FirebaseFirestore.instance.collection('posts').get().then((value) {
+    // print(" commentss ${comments.length}");
+    await FirebaseFirestore.instance
+        .collection('posts')
+        .orderBy('dateTime')
+        .get()
+        .then((value) {
       for (var element in value.docs) {
         element.reference.collection('likes').get().then((value) {
           likes.add(value.docs.length);
+          emit(GetLikePostSuccessState());
         }).catchError((error) {});
+
         element.reference.collection('comments').get().then((value) {
           comments.add(value.docs.length);
-        }).catchError((error) {});
+          emit(GetCommentPostSuccessState());
+        }).catchError((error) {
+          print("error in comments $error");
+        });
         postsId.add(element.id);
         posts.add(PostModel.fromJson(element.data()));
       }
+      print("comments in cubit ${comments.length}");
+
       emit(SocialGetPostsSuccessState());
     }).catchError((error) {
       print(error.toString());
@@ -374,19 +366,14 @@ class AppCubit extends Cubit<AppStates> {
         .doc(postId)
         .collection('likes')
         .doc(CashHelper.get(key: 'uId'))
-        .set({
-      'like': true,
-    }).then((value) {
+        .set({'like': true, 'uId': CashHelper.get(key: 'uId')}).then((value) {
       emit(SocialLikePostSuccessState());
     }).catchError((error) {
       emit(SocialLikePostErrorState());
     });
   }
 
-  void commentPost({
-    String? postId,
-    String? comment,
-  }) {
+  void commentPost({String? postId, String? comment}) {
     FirebaseFirestore.instance
         .collection('posts')
         .doc(postId)
@@ -397,6 +384,80 @@ class AppCubit extends Cubit<AppStates> {
       emit(SocialCommentPostSuccessState());
     }).catchError((error) {
       emit(SocialCommentPostErrorState());
+    });
+  }
+
+  void getUsers() {
+    if (users.isEmpty) {
+      FirebaseFirestore.instance.collection('users').get().then((value) {
+        for (var element in value.docs) {
+          if (element.data()['uId'] != userModel!.uId) {
+            users.add(UserModel.fromJson(element.data()));
+          }
+        }
+        emit(SocialGetUsersSuccessState());
+      }).catchError((error) {
+        print(error.toString());
+        emit(SocialGetUsersErrorState());
+      });
+    }
+  }
+
+  void sendMessage({
+    String? receiverId,
+    String? dateTime,
+    String? message,
+  }) {
+    MessageModel model = MessageModel(
+        message: message,
+        senderId: userModel!.uId,
+        receiverId: receiverId,
+        dateTime: dateTime);
+
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userModel!.uId)
+        .collection('chats')
+        .doc(receiverId)
+        .collection('messages')
+        .add(model.toJson())
+        .then((value) {
+      emit(SendMessageSuccessState());
+    }).catchError((error) {
+      emit(SendMessageErrorState());
+    });
+
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(receiverId)
+        .collection('chats')
+        .doc(userModel!.uId)
+        .collection('messages')
+        .add(model.toJson())
+        .then((value) {
+      emit(SendMessageSuccessState());
+    }).catchError((error) {
+      emit(SendMessageErrorState());
+    });
+  }
+
+  List<MessageModel> messages = [];
+
+  void getMessages({String? receiverId}) {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userModel!.uId)
+        .collection('chats')
+        .doc(receiverId)
+        .collection('messages')
+        .orderBy('dateTime')
+        .snapshots()
+        .listen((event) {
+      messages.clear();
+      event.docs.reversed.forEach((element) {
+        messages.add(MessageModel.fromJson(element.data()));
+      });
+      emit(GetMessageSuccessState());
     });
   }
 }

@@ -53,8 +53,17 @@ class GetPostsErrorState extends AppStates {}
 
 class SocialGetPostsSuccessState extends AppStates {}
 class SocialGetPostsErrorState extends AppStates {}
+class SocialGetUsersSuccessState extends AppStates {}
+class SocialGetUsersErrorState extends AppStates {}
 class SocialLikePostSuccessState extends AppStates {}
 class SocialLikePostErrorState extends AppStates {}
 class SocialCommentPostSuccessState extends AppStates {}
 class SocialCommentPostErrorState extends AppStates {}
 
+class GetCommentPostSuccessState extends AppStates {}
+class GetLikePostSuccessState extends AppStates {}
+
+class SendMessageSuccessState extends AppStates {}
+class SendMessageErrorState extends AppStates {}
+class GetMessageSuccessState extends AppStates {}
+class GetMessageErrorState extends AppStates {}

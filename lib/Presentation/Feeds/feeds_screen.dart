@@ -13,6 +13,9 @@ class FeedsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var cubit = AppCubit.get(context);
+    cubit.posts.clear();
+    cubit.getPosts();
+    print('comments in screen ${cubit.comments.length}');
     return BlocConsumer<AppCubit, AppStates>(
       listener: (context, state) => () {},
       builder: (context, state) {
@@ -48,22 +51,45 @@ class FeedsScreen extends StatelessWidget {
                   ),
                 ),
                 sizedBox(height: 16),
-                cubit.posts.isEmpty || cubit.likes.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
-                    : ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) => postItemBuilder(
+                if (cubit.posts.isEmpty)
+                  Column(
+                    children: [
+                      sizedBox(height: 64),
+                      const Icon(
+                        IconBroken.Danger,
+                        color: Colors.blue,
+                        size: 200,
+                      ),
+                      text("Not Found Posts",
+                          color: Colors.blue,
+                          size: 30,
+                          fontWeight: FontWeight.w800)
+                    ],
+                  )
+                else if (cubit.likes.isEmpty || cubit.comments.isEmpty)
+                  // Center(
+                  //   child: Column(
+                  //     children: [
+                  //       const CircularProgressIndicator(),
+                  //       text('comments ${cubit.comments.length}'),
+                  //       text('likes ${cubit.likes.length}'),
+                  //     ],
+                  //   ),
+                  // )
+                  Container()
+                else
+                  ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) => postItemBuilder(
                             context,
                             postModel: cubit.posts[index],
                             index: index,
                             postId: AppCubit.get(context).postsId[index],
-                            like: cubit.likes[index],
-                            comment: cubit.comments[index]),
-                        separatorBuilder: (context, index) =>
-                            sizedBox(height: 16),
-                        itemCount:
-                            cubit.posts.isEmpty ? 1 : cubit.posts.length),
+                          ),
+                      separatorBuilder: (context, index) =>
+                          sizedBox(height: 16),
+                      itemCount: cubit.posts.isEmpty ? 1 : cubit.posts.length),
                 sizedBox(height: 32),
               ],
             ),
@@ -75,11 +101,7 @@ class FeedsScreen extends StatelessWidget {
 }
 
 Widget postItemBuilder(context,
-    {PostModel? postModel,
-    int? index = 1,
-    int? like,
-    int? comment,
-    String? postId}) {
+    {PostModel? postModel, int? index = 1, String? postId}) {
   return Container(
     width: double.infinity,
     decoration: BoxDecoration(
@@ -138,59 +160,7 @@ Widget postItemBuilder(context,
           ),
           text(postModel.text!, size: 15, fontWeight: FontWeight.w400),
           sizedBox(height: 8),
-          Wrap(
-            children: [
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 10),
-                child: SizedBox(
-                  height: 25,
-                  child: MaterialButton(
-                    onPressed: () {},
-                    minWidth: 1,
-                    padding: EdgeInsets.zero,
-                    child: text('#flutter', color: Colors.blue, size: 13),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 10),
-                child: SizedBox(
-                  height: 25,
-                  child: MaterialButton(
-                    onPressed: () {},
-                    minWidth: 1,
-                    padding: EdgeInsets.zero,
-                    child: text('#software', color: Colors.blue, size: 13),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 10),
-                child: SizedBox(
-                  height: 25,
-                  child: MaterialButton(
-                    onPressed: () {},
-                    minWidth: 1,
-                    padding: EdgeInsets.zero,
-                    child: text('#flutter_developer',
-                        color: Colors.blue, size: 13),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 10),
-                child: SizedBox(
-                  height: 25,
-                  child: MaterialButton(
-                    onPressed: () {},
-                    minWidth: 1,
-                    padding: EdgeInsets.zero,
-                    child: text('#mobile_app', color: Colors.blue, size: 13),
-                  ),
-                ),
-              ),
-            ],
-          ),
+
           sizedBox(height: 8),
           if (postModel.postImageUrl! != '')
             ConstrainedBox(
@@ -229,7 +199,8 @@ Widget postItemBuilder(context,
                         size: 24,
                       ),
                       sizedBox(width: 8),
-                      text('$like', color: Colors.grey)
+                      text('${AppCubit.get(context).likes[index!]}',
+                          color: Colors.grey)
                     ],
                   ),
                 ),
@@ -241,7 +212,8 @@ Widget postItemBuilder(context,
                       size: 20,
                     ),
                     sizedBox(width: 8),
-                    text('$comment Comment', color: Colors.grey)
+                    text('${AppCubit.get(context).comments[index]} Comment',
+                        color: Colors.grey)
                   ],
                 ),
               ],
@@ -269,8 +241,8 @@ Widget postItemBuilder(context,
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () {
+              TextButton(
+                onPressed: () {
                   AppCubit.get(context).likePost(postId!);
                 },
                 child: Row(
