@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../Shared/Cubit/cubit.dart';
 import '../../Shared/Cubit/states.dart';
+import '../Components/Constants/icon_broken.dart';
 import '../Components/Constants/navigator.dart';
 import '../Components/Widgets/constants.dart';
 import '../Components/Widgets/svg_image.dart';
@@ -60,6 +61,7 @@ class RegistrationScreen extends StatelessWidget {
                         }
                         return null;
                       },
+                      prefixIcon:const Icon(IconBroken.User),
                     ),
                     sizedBox(height: 16),
                     CustomTextFormField(
@@ -75,6 +77,7 @@ class RegistrationScreen extends StatelessWidget {
                         }
                         return null;
                       },
+                      prefixIcon:const Icon(IconBroken.Call),
                     ),
                     sizedBox(height: 16),
                     CustomTextFormField(
@@ -83,6 +86,7 @@ class RegistrationScreen extends StatelessWidget {
                       },
                       controller: emailController,
                       title: 'Email',
+                      prefixIcon:const Icon(IconBroken.Message),
                       keyboardType: TextInputType.emailAddress,
                       validation: (String? value) {
                         if (value!.isEmpty) {
@@ -93,6 +97,7 @@ class RegistrationScreen extends StatelessWidget {
                     ),
                     sizedBox(height: 16),
                     CustomTextFormField(
+                      prefixIcon:const Icon(IconBroken.Lock),
                       onChanged: (value) {
                         debugPrint(value);
                       },

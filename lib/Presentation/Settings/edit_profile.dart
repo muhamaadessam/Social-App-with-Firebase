@@ -164,9 +164,11 @@ class EditProfileScreen extends StatelessWidget {
                       }
                       return null;
                     },
+                    prefixIcon: const Icon(IconBroken.User),
                   ),
                   sizedBox(height: 16),
                   CustomTextFormField(
+                    prefixIcon:const Icon(IconBroken.Info_Circle),
                     keyboardType: TextInputType.text,
                     onChanged: (value) {
                       debugPrint(value);
@@ -182,6 +184,7 @@ class EditProfileScreen extends StatelessWidget {
                   ),
                   sizedBox(height: 16),
                   CustomTextFormField(
+                    prefixIcon: Icon(IconBroken.Call),
                     keyboardType: TextInputType.phone,
                     onChanged: (value) {
                       debugPrint(value);

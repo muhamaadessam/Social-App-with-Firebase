@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:social/Presentation/Registration/registration_screen.dart';
 import 'package:social/Shared/Cubit/cubit.dart';
 import 'package:social/Shared/Cubit/states.dart';
+import '../Components/Constants/icon_broken.dart';
 import '../Components/Constants/navigator.dart';
 import '../Components/Widgets/constants.dart';
 import '../Components/Widgets/svg_image.dart';
@@ -74,9 +75,11 @@ class SignInScreen extends StatelessWidget {
                             }
                             return null;
                           },
+                          prefixIcon:const Icon(IconBroken.Message),
                         ),
                         sizedBox(height: 16),
                         CustomTextFormField(
+                          prefixIcon:const Icon(IconBroken.Lock),
                           onChanged: (value) {
                             debugPrint(value);
                           },

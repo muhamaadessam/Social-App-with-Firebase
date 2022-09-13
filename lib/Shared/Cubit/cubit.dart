@@ -11,7 +11,7 @@ import 'package:social/Models/user_model.dart';
 import 'package:social/Presentation/Chat/chat_screen.dart';
 import 'package:social/Presentation/Components/Widgets/toast.dart';
 import 'package:social/Presentation/Feeds/feeds_screen.dart';
-import 'package:social/Presentation/Settings/settings_screen.dart';
+import 'package:social/Presentation/Settings/profile_screen.dart';
 import 'package:social/Presentation/Users/users_screen.dart';
 import 'package:social/Shared/Cubit/states.dart';
 import 'package:social/Shared/Network/Local/cash_helper.dart';
@@ -34,26 +34,27 @@ class AppCubit extends Cubit<AppStates> {
     'Home',
     'Chats',
     '',
-    'Users',
-    'Settings',
+    'Notifications',
+    'Profile',
   ];
   List<Widget> screens = [
     const FeedsScreen(),
     const ChatScreen(),
     Container(),
     const UsersScreen(),
-    const SettingsScreen(),
+    const ProfileScreen(),
   ];
   File? coverImage;
   var picker = ImagePicker();
   File? profileImage;
   File? postImage;
+  String? postImageUrlPut;
   PostModel? postModel;
   List<PostModel> posts = [];
+  List<PostModel> myPosts = [];
   List<UserModel> users = [];
   List<String> postsId = [];
-  List<int> likes = [];
-  List<int> comments = [];
+  List<String> myPostsId = [];
 
   void userSignIn(context, {required String email, required String password}) {
     emit(SignInLoadingState());
@@ -144,9 +145,9 @@ class AppCubit extends Cubit<AppStates> {
       phone: phone,
       bio: 'write your bio ...',
       coverImageUrl:
-          'https://img.freepik.com/free-photo/view-new-york-city-night-time_53876-147490.jpg?w=900&t=st=1661938316~exp=1661938916~hmac=ff6ce4d536e6462df33fd1f1fd0da3e69a1b2aa316c92d97b35e43a2bf7f0ff7',
+          'https://img.freepik.com/free-vector/ornament-beautiful-background-geometric-circle-element_1159-20358.jpg?w=900&t=st=1662150415~exp=1662151015~hmac=2f0f54f84eeb7df70128663886b5e31f37e3126e7c68a41f767b0c5043340fb1',
       imageUrl:
-          'https://drive.google.com/file/d/1n1ACYKbIJRO-W6eULOd736EhyqJGD39R/view',
+          'https://img.freepik.com/free-vector/man-shows-gesture-great-idea_10045-637.jpg?w=740&t=st=1662151566~exp=1662152166~hmac=36fe98bddbcc8fe5e83010a33b79a277e5217c66a16b16fa4b88fcb6d3babb39',
     );
     FirebaseFirestore.instance.collection('users').doc(uId).set(
           userModel!.toJson(),
@@ -259,6 +260,11 @@ class AppCubit extends Cubit<AppStates> {
     emit(RemovePostImageSuccessState());
   }
 
+  void removePostImageUrl() {
+    postImageUrlPut = null;
+    emit(RemoveImagePostFromUrlSuccessState());
+  }
+
   Future getPostImage() async {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -267,12 +273,15 @@ class AppCubit extends Cubit<AppStates> {
       emit(GetPostImageSuccessState());
     } else {
       emit(GetPostImageErrorState());
-      print('No image');
     }
   }
 
+  void getPostImageUrlPut(String image) {
+    postImageUrlPut = image;
+    emit(GetImagePostFromUrlSuccessState());
+  }
+
   void createPost({String? dateTime, String? text, String? postImageUrl}) {
-    print("PATH: Create Post");
     emit(CreatePostLoadingState());
     postModel = PostModel(
       name: userModel!.name,
@@ -280,97 +289,159 @@ class AppCubit extends Cubit<AppStates> {
       uId: CashHelper.get(key: 'uId'),
       dateTime: dateTime ?? '',
       text: text ?? '',
-      postImageUrl: postImageUrl ?? '',
+      postImageUrl: postImageUrl ?? postImageUrlPut ?? '',
     );
-    print("PATH: Create Post before modelling");
     FirebaseFirestore.instance
         .collection('posts')
         .add(postModel!.toJson())
         .then((value) {
-      print("PATH: Create Post after add data");
-      getPosts();
+      getPosts(uId: CashHelper.get(key: 'uId'));
       emit(CreatePostSuccessState());
     }).catchError((error) {
       emit(CreatePostErrorState());
-      print('error : $error');
     });
   }
 
-  void uploadPostImage({String? dateTime, String? text}) {
+  void updatePost(
+      {String? updateDateTime,
+      String? text,
+      String? postImageUrl,
+      String? postId}) {
+    emit(UpDatePostLoadingState());
+    postModel = PostModel(
+      name: userModel!.name,
+      imageUrl: userModel!.imageUrl,
+      uId: CashHelper.get(key: 'uId'),
+      updateDateTime: updateDateTime ?? '',
+      text: text ?? '',
+      postImageUrl: postImageUrl ?? postImageUrlPut ?? '',
+    );
+
+    FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .update(postModel!.toJson())
+        .then((value) {
+      emit(UpDatePostSuccessState());
+    }).catchError((error) {
+      emit(UpDatePostErrorState());
+    });
+  }
+
+  void uploadPostImage({String? dateTime, String? text, bool? update}) {
     emit(CreatePostLoadingState());
-    print("PATH: upload Post Image");
     firebase_storage.FirebaseStorage.instance
         .ref()
         .child('posts/${Uri.file(postImage!.path).pathSegments.last}')
         .putFile(postImage!)
         .then((value) {
       value.ref.getDownloadURL().then((value) {
-        createPost(
-          dateTime: dateTime,
-          text: text,
-          postImageUrl: value,
-        );
-        print("PATH: upload Post Image after create Post");
+        if (update!) {
+          updatePost(
+            updateDateTime: dateTime,
+            text: text,
+            postImageUrl: value,
+          );
+        } else {
+          createPost(
+            dateTime: dateTime,
+            text: text,
+            postImageUrl: value,
+          );
+        }
         emit(CreatePostSuccessState());
       }).catchError((error) {
         emit(CreatePostErrorState());
-
-        print('error : $error');
       });
     }).catchError((error) {
       emit(CreatePostErrorState());
-
-      print('error : $error');
     });
   }
 
-  void getPosts() async {
-    postsId.clear();
-    posts.clear();
-    likes.clear();
-    comments.clear();
+  PostModel? postModelWithId;
 
-    // print(" commentss ${comments.length}");
-    await FirebaseFirestore.instance
+  void getPostDataWithId(String postId) {
+    FirebaseFirestore.instance
         .collection('posts')
-        .orderBy('dateTime')
+        .doc(postId)
         .get()
         .then((value) {
-      for (var element in value.docs) {
-        element.reference.collection('likes').get().then((value) {
-          likes.add(value.docs.length);
-          emit(GetLikePostSuccessState());
-        }).catchError((error) {});
+      postModelWithId = PostModel.fromJson(value.data()!);
+    });
+  }
 
-        element.reference.collection('comments').get().then((value) {
-          comments.add(value.docs.length);
-          emit(GetCommentPostSuccessState());
-        }).catchError((error) {
-          print("error in comments $error");
-        });
+  void getPosts({String? uId}) async {
+    emit(SocialGetPostsLoadingState());
+
+    FirebaseFirestore.instance
+        .collection('posts')
+        .orderBy('dateTime')
+        .snapshots()
+        .listen((value) {
+      postsId.clear();
+      posts.clear();
+      myPostsId.clear();
+      myPosts.clear();
+      for (var element in value.docs) {
+        if (uId == CashHelper.get(key: 'uId')) {
+          myPostsId.add(element.id);
+          myPosts.add(PostModel.fromJson(element.data()));
+        }
         postsId.add(element.id);
         posts.add(PostModel.fromJson(element.data()));
       }
-      print("comments in cubit ${comments.length}");
-
       emit(SocialGetPostsSuccessState());
-    }).catchError((error) {
-      print(error.toString());
-      emit(SocialGetPostsErrorState());
     });
   }
 
-  void likePost(String postId) {
-    FirebaseFirestore.instance
+  void deletePosts({String? postId}) async {
+    FirebaseFirestore.instance.collection('posts').doc(postId).delete();
+    getPosts();
+    emit(SocialDeletePostsState());
+  }
+
+  Stream<DocumentSnapshot<Object?>>? getLikeStream(String postId) {
+    return FirebaseFirestore.instance
         .collection('posts')
         .doc(postId)
         .collection('likes')
         .doc(CashHelper.get(key: 'uId'))
-        .set({'like': true, 'uId': CashHelper.get(key: 'uId')}).then((value) {
-      emit(SocialLikePostSuccessState());
-    }).catchError((error) {
-      emit(SocialLikePostErrorState());
-    });
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot<Object?>>? getNumberLikeStream(String postId) {
+    return FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection('likes')
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot<Object?>>? getCommentsLikeStream(String postId) {
+    return FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .snapshots();
+  }
+
+  void addLike({bool? liked, String? postId}) {
+    liked = !liked!;
+    if (liked) {
+      FirebaseFirestore.instance
+          .collection('posts')
+          .doc(postId)
+          .collection('likes')
+          .doc(CashHelper.get(key: 'uId'))
+          .set({'like': true, 'uId': CashHelper.get(key: 'uId')});
+    } else {
+      FirebaseFirestore.instance
+          .collection('posts')
+          .doc(postId)
+          .collection('likes')
+          .doc(CashHelper.get(key: 'uId'))
+          .delete();
+    }
   }
 
   void commentPost({String? postId, String? comment}) {

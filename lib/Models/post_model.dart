@@ -3,6 +3,7 @@ class PostModel {
   String? name;
   String? imageUrl;
   String? dateTime;
+  String? updateDateTime;
   String? text;
   String? postImageUrl;
 
@@ -12,6 +13,7 @@ class PostModel {
         this.imageUrl,
         this.text,
         this.dateTime,
+        this.updateDateTime,
         this.postImageUrl});
 
   PostModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class PostModel {
     imageUrl = json['imageUrl'];
     text = json['text'];
     dateTime = json['dateTime'];
+    updateDateTime = json['updateDateTime'];
     postImageUrl = json['postImageUrl'];
   }
 
@@ -30,6 +33,7 @@ class PostModel {
     data['imageUrl'] = imageUrl;
     data['text'] = text;
     data['dateTime'] = dateTime;
+    data['updateDateTime'] = updateDateTime;
     data['postImageUrl'] = postImageUrl;
     return data;
   }

@@ -6,8 +6,9 @@ Widget bottomBarIcons(context, {IconData? icon, int? index}) {
   return Icon(
     icon,
     size: 30,
-    color: AppCubit.get(context).currentIndex != index
-        ? Colors.black
-        : Colors.white,
+    // color: AppCubit.get(context).currentIndex != index
+    //     ? Colors.black
+    //     : Colors.white,
+    color: Colors.white,
   );
 }

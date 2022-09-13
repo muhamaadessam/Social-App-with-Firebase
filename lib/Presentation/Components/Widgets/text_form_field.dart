@@ -9,9 +9,10 @@ class CustomTextFormField extends StatelessWidget {
   final TextInputType? keyboardType;
   final int? maxLine;
   final Function(String)? onChanged;
+  final Widget? prefixIcon;
 
   const CustomTextFormField({
-    Key? key,
+    super.key,
     required this.title,
     this.isPassword = false,
     required this.controller,
@@ -19,6 +20,7 @@ class CustomTextFormField extends StatelessWidget {
     this.maxLine = 1,
     this.keyboardType,
     this.onChanged,
+    this.prefixIcon,
   });
 
   @override
@@ -32,6 +34,7 @@ class CustomTextFormField extends StatelessWidget {
       onChanged: onChanged,
       decoration: InputDecoration(
         labelText: title,
+        prefixIcon: prefixIcon,
         labelStyle: GoogleFonts.aBeeZee(),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(5),
